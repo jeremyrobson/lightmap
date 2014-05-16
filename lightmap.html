@@ -1,0 +1,88 @@
+<!doctype html>
+<head><script type="text/javascript">
+
+var canvas, context;
+var invsqrt, field, enemy;
+var mx, my;
+
+function mousemove() {
+    mx = Math.floor((event.x - canvas.offsetLeft)/16);
+    my = Math.floor((event.y - canvas.offsetTop)/16);
+    
+    enemy[0].x = mx;
+    enemy[0].y = my;
+    
+    draw();
+}
+
+function draw() {
+    context.clearRect(0,0,512,512);
+    
+    for (var x=0;x<32;x++) {
+        for (var y=0;y<32;y++) {
+            field[x][y] = 0;
+            enemy.forEach(function(e) {
+                field[x][y] += invsqrt[Math.abs(x-e.x)][Math.abs(y-e.y)];
+            });
+            field[x][y] = 1 - field[x][y]/2;
+        }
+    }
+
+    context.textBaseline = "top";
+    context.font = "10px Verdana";
+    for (var x=0;x<32;x++) {
+        for (var y=0;y<32;y++) {
+            context.fillStyle = "rgba(0,0,0," + field[x][y] + ")";
+            context.fillRect(x*16,y*16,16,16);
+            //context.fillStyle = "rgb(255,255,255)";
+            //context.fillText(Math.floor(field[x][y]*100),x*16,y*16);
+        }
+    }
+    
+    context.fillStyle = "rgb(255,255,255)";
+    enemy.forEach(function(e) {
+        context.fillText("e", e.x*16,e.y*16);
+    });
+}
+
+window.onload = function() {
+    canvas = document.getElementById("canvas");
+    context = canvas.getContext("2d");
+    
+    canvas.onmousemove = mousemove;
+    
+    enemy = [];
+    for (var i=0;i<8;i++) {
+        enemy[i] = {
+            "x": Math.floor(Math.random() * 32),
+            "y": Math.floor(Math.random() * 32)
+        }
+    }
+    
+    invsqrt = [];
+    var d;
+    for (var x=0;x<32;x++) {
+        invsqrt[x] = [];
+        for (var y=0;y<32;y++) {
+            d = Math.sqrt(x*x+y*y);
+            if (d==0) { d = 1; }
+            invsqrt[x][y] = 1 / d;
+        }
+    } 
+
+    field = [];
+    for (var x=0;x<32;x++) {
+        field[x] = [];
+        for (var y=0;y<32;y++) {
+            field[x][y] = 0;
+        }
+    }
+    
+    draw();
+};
+
+</script>
+<body>
+<canvas id="canvas" width="512" height="512"></canvas>
+</body>
+</html>
